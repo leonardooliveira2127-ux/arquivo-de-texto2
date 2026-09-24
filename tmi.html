@@ -1,0 +1,1437 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>COF TMI</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #eef1f5;
+    color: #1f2937;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+header {
+    background: #111827;
+    color: white;
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.header {
+    max-width: 700px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.contador {
+    background: #374151;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+main {
+    max-width: 700px;
+    margin: auto;
+    padding: 14px;
+}
+
+button {
+    cursor: pointer;
+}
+
+.btn {
+    border: 0;
+    border-radius: 11px;
+    padding: 13px 15px;
+    font-weight: bold;
+}
+
+.btn-primary {
+    width: 100%;
+    background: #2563eb;
+    color: white;
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.btn-danger {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.btn-green {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.titulo-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.titulo-area h2 {
+    margin: 0;
+}
+
+.backup-acoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.dias {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dia-card {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    cursor: pointer;
+    border: 1px solid #e5e7eb;
+}
+
+.dia-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dia-data {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.seta {
+    font-size: 22px;
+    color: #6b7280;
+}
+
+.dia-info {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.tag {
+    padding: 7px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.tag-blue {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.vazio {
+    text-align: center;
+    padding: 35px 15px;
+    color: #6b7280;
+    background: white;
+    border-radius: 15px;
+}
+
+.card {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 13px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+}
+
+.card h2 {
+    margin: 0 0 15px;
+    font-size: 18px;
+}
+
+/* CAMPOS DO TMI */
+
+.campo {
+    margin-bottom: 13px;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+input {
+    width: 100%;
+    height: 50px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 0 12px;
+    outline: none;
+    background: #fafafa;
+}
+
+input:focus {
+    border-color: #2563eb;
+    background: white;
+}
+
+/* BOBINA */
+
+.campo-bobina {
+    width: 100%;
+    margin-bottom: 13px;
+}
+
+/* FXF + VXV */
+
+.dupla {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 13px;
+}
+
+/* ESTÁTICO + AVERAGE */
+
+.dupla-cof {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 13px;
+}
+
+.campo-box {
+    min-width: 0;
+}
+
+.adicionar {
+    width: 100%;
+    height: 54px;
+    border: 0;
+    border-radius: 11px;
+    background: #2563eb;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.dia-header {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 13px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+}
+
+.dia-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dia-header h2 {
+    margin: 0;
+}
+
+.voltar {
+    margin-bottom: 12px;
+}
+
+.acoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+/* TABELA */
+
+.tabela-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tabela {
+    min-width: 700px;
+}
+
+.tabela-header,
+.linha {
+    display: grid;
+    grid-template-columns:
+        35px
+        1.4fr
+        1fr
+        1fr
+        1.3fr
+        1.3fr
+        40px;
+    gap: 6px;
+    align-items: center;
+}
+
+.tabela-header {
+    color: #6b7280;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0 5px 7px;
+}
+
+.linha {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 8px 5px;
+    margin-bottom: 7px;
+}
+
+.linha span {
+    text-align: center;
+    word-break: break-word;
+}
+
+.numero {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.valor {
+    font-weight: bold;
+}
+
+.excluir {
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 8px;
+    background: #fee2e2;
+    color: #dc2626;
+    font-weight: bold;
+}
+
+/* MOBILE */
+
+@media (max-width: 500px) {
+
+    main {
+        padding: 10px;
+    }
+
+    .dupla,
+    .dupla-cof {
+        gap: 8px;
+    }
+
+    .tabela {
+        min-width: 700px;
+    }
+
+    .titulo-area {
+        align-items: stretch;
+    }
+
+    .titulo-area .btn {
+        padding: 10px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+
+    <div class="header">
+
+        <div class="logo">
+            📊 COF TMI
+        </div>
+
+        <div
+            id="contadorHeader"
+            class="contador"
+        >
+            0 dias
+        </div>
+
+    </div>
+
+</header>
+
+<main id="app"></main>
+
+<input
+    id="arquivoBackup"
+    type="file"
+    accept=".json,application/json"
+    hidden
+    onchange="restaurarBackup(event)"
+>
+
+<script>
+
+let dias =
+    JSON.parse(
+        localStorage.getItem("cof_dias_tmi")
+    ) || [];
+
+let diaAtualId = null;
+
+
+/* =========================
+   SALVAR
+========================= */
+
+function salvarDados() {
+
+    localStorage.setItem(
+        "cof_dias_tmi",
+        JSON.stringify(dias)
+    );
+
+}
+
+
+/* =========================
+   DATA
+========================= */
+
+function dataHoje() {
+
+    const d = new Date();
+
+    return d.getFullYear() +
+        "-" +
+        String(d.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(d.getDate()).padStart(2, "0");
+}
+
+function formatarData(data) {
+
+    const p = data.split("-");
+
+    return `${p[2]}/${p[1]}/${p[0]}`;
+}
+
+
+/* =========================
+   BACKUP
+========================= */
+
+function fazerBackup() {
+
+    if (!dias.length) {
+
+        alert("Não há dados para fazer backup.");
+
+        return;
+    }
+
+    const backup = {
+
+        tipo: "COF_TMI",
+
+        versao: 2,
+
+        dataBackup:
+            new Date().toISOString(),
+
+        dados: dias
+    };
+
+    const blob = new Blob(
+        [
+            JSON.stringify(
+                backup,
+                null,
+                2
+            )
+        ],
+        {
+            type:
+                "application/json;charset=utf-8"
+        }
+    );
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const link =
+        document.createElement("a");
+
+    link.href = url;
+
+    link.download =
+        `BACKUP_COF_TMI_${dataHoje()}.json`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    URL.revokeObjectURL(url);
+}
+
+
+function selecionarBackup() {
+
+    document
+        .getElementById("arquivoBackup")
+        .click();
+
+}
+
+
+function restaurarBackup(event) {
+
+    const arquivo =
+        event.target.files[0];
+
+    if (!arquivo) return;
+
+    const leitor =
+        new FileReader();
+
+    leitor.onload = function(e) {
+
+        try {
+
+            const backup =
+                JSON.parse(e.target.result);
+
+            if (
+                !backup.dados ||
+                !Array.isArray(backup.dados)
+            ) {
+
+                throw new Error();
+
+            }
+
+            if (
+                backup.tipo &&
+                backup.tipo !== "COF_TMI"
+            ) {
+
+                alert(
+                    "Esse backup não é do COF TMI."
+                );
+
+                return;
+            }
+
+            if (
+                !confirm(
+                    "Restaurar este backup?\n\nOs dados atuais serão substituídos."
+                )
+            ) {
+
+                return;
+            }
+
+            dias =
+                backup.dados;
+
+            salvarDados();
+
+            diaAtualId = null;
+
+            telaInicial();
+
+            alert(
+                "Backup restaurado com sucesso!"
+            );
+
+        } catch {
+
+            alert(
+                "Backup inválido."
+            );
+
+        }
+
+        event.target.value = "";
+
+    };
+
+    leitor.readAsText(arquivo);
+}
+
+
+/* =========================
+   TELA INICIAL
+========================= */
+
+function telaInicial() {
+
+    diaAtualId = null;
+
+    document.getElementById(
+        "contadorHeader"
+    ).textContent =
+        `${dias.length} ${dias.length === 1 ? "dia" : "dias"}`;
+
+    let html = `
+
+        <div class="titulo-area">
+
+            <h2>
+                📅 Histórico TMI
+            </h2>
+
+            <button
+                class="btn btn-green"
+                onclick="fazerBackup()"
+            >
+                💾 BACKUP
+            </button>
+
+        </div>
+
+        <div class="backup-acoes">
+
+            <button
+                class="btn btn-secondary"
+                onclick="selecionarBackup()"
+            >
+                ♻️ RESTAURAR
+            </button>
+
+            <button
+                class="btn btn-secondary"
+                onclick="location.href='index.html'"
+            >
+                ← TIPOS
+            </button>
+
+        </div>
+
+        <div class="dias">
+    `;
+
+    if (!dias.length) {
+
+        html += `
+
+            <div class="vazio">
+
+                <div style="font-size:35px">
+                    📊
+                </div>
+
+                <p>
+                    Nenhum TMI cadastrado.
+                </p>
+
+            </div>
+
+        `;
+
+    } else {
+
+        [...dias]
+            .sort(
+                (a,b) =>
+                    b.data.localeCompare(a.data)
+            )
+            .forEach(dia => {
+
+                html += `
+
+                    <div
+                        class="dia-card"
+                        onclick="abrirDia('${dia.id}')"
+                    >
+
+                        <div class="dia-topo">
+
+                            <div class="dia-data">
+                                📅 ${formatarData(dia.data)}
+                            </div>
+
+                            <div class="seta">
+                                ›
+                            </div>
+
+                        </div>
+
+                        <div class="dia-info">
+
+                            <span class="tag tag-blue">
+                                ${dia.registros.length} TMI
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                `;
+            });
+    }
+
+    html += `
+
+        </div>
+
+        <div style="margin-top:12px">
+
+            <button
+                class="btn btn-primary"
+                onclick="novoDia()"
+            >
+                ＋ NOVO TMI
+            </button>
+
+        </div>
+    `;
+
+    document.getElementById(
+        "app"
+    ).innerHTML = html;
+}
+
+
+/* =========================
+   NOVO DIA
+========================= */
+
+function novoDia() {
+
+    document.getElementById(
+        "app"
+    ).innerHTML = `
+
+        <button
+            class="btn btn-secondary voltar"
+            onclick="telaInicial()"
+        >
+            ← VOLTAR
+        </button>
+
+        <section class="card">
+
+            <h2>
+                📊 Novo TMI
+            </h2>
+
+            <div class="campo">
+
+                <label>
+                    DATA
+                </label>
+
+                <input
+                    id="novaData"
+                    type="date"
+                    value="${dataHoje()}"
+                >
+
+            </div>
+
+            <button
+                class="btn btn-primary"
+                onclick="criarDia()"
+            >
+                CRIAR TMI
+            </button>
+
+        </section>
+    `;
+}
+
+
+function criarDia() {
+
+    const data =
+        document.getElementById(
+            "novaData"
+        ).value;
+
+    if (!data) {
+
+        alert("Escolha a data.");
+
+        return;
+    }
+
+    const dia = {
+
+        id: Date.now().toString(),
+
+        data: data,
+
+        registros: []
+
+    };
+
+    dias.push(dia);
+
+    salvarDados();
+
+    abrirDia(dia.id);
+}
+
+
+/* =========================
+   ABRIR DIA
+========================= */
+
+function abrirDia(id) {
+
+    const dia =
+        dias.find(
+            d => d.id === id
+        );
+
+    if (!dia) {
+
+        telaInicial();
+
+        return;
+    }
+
+    diaAtualId = id;
+
+    document.getElementById(
+        "contadorHeader"
+    ).textContent =
+        `${dia.registros.length} TMI`;
+
+    let html = `
+
+        <button
+            class="btn btn-secondary voltar"
+            onclick="telaInicial()"
+        >
+            ← HISTÓRICO
+        </button>
+
+        <section class="dia-header">
+
+            <div class="dia-header-top">
+
+                <h2>
+                    📅 ${formatarData(dia.data)}
+                </h2>
+
+                <button
+                    class="btn btn-danger"
+                    onclick="excluirDia('${dia.id}')"
+                >
+                    🗑️
+                </button>
+
+            </div>
+
+        </section>
+
+        <section class="card">
+
+            <h2>
+                ➕ ADICIONAR TMI
+            </h2>
+
+            <!-- BOBINA -->
+
+            <div class="campo-bobina">
+
+                <label>
+                    BOBINA
+                </label>
+
+                <input
+                    id="bobina"
+                    type="text"
+                    inputmode="text"
+                    autocomplete="off"
+                    autocapitalize="characters"
+                    placeholder="Digite a bobina"
+                >
+
+            </div>
+
+            <!-- FXF / VXV -->
+
+            <div class="dupla">
+
+                <div class="campo-box">
+
+                    <label>
+                        FXF
+                    </label>
+
+                    <input
+                        id="fxf"
+                        type="number"
+                        inputmode="decimal"
+                        step="any"
+                        placeholder="FXF"
+                    >
+
+                </div>
+
+                <div class="campo-box">
+
+                    <label>
+                        VXV
+                    </label>
+
+                    <input
+                        id="vxv"
+                        type="number"
+                        inputmode="decimal"
+                        step="any"
+                        placeholder="VXV"
+                    >
+
+                </div>
+
+            </div>
+
+            <!-- ESTÁTICO / AVERAGE -->
+
+            <div class="dupla-cof">
+
+                <div class="campo-box">
+
+                    <label>
+                        ESTÁTICO COF
+                    </label>
+
+                    <input
+                        id="estatico"
+                        type="number"
+                        inputmode="decimal"
+                        step="any"
+                        placeholder="Estático COF"
+                    >
+
+                </div>
+
+                <div class="campo-box">
+
+                    <label>
+                        AVERAGE COF
+                    </label>
+
+                    <input
+                        id="average"
+                        type="number"
+                        inputmode="decimal"
+                        step="any"
+                        placeholder="Average COF"
+                    >
+
+                </div>
+
+            </div>
+
+            <button
+                class="adicionar"
+                onclick="adicionarTMI()"
+            >
+                ＋ ADICIONAR TMI
+            </button>
+
+        </section>
+
+        <section class="card">
+
+            <h2>
+                📋 TMI DESTE DIA
+            </h2>
+
+            <div class="tabela-scroll">
+
+                <div class="tabela">
+
+                    ${gerarTabela(dia)}
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="card">
+
+            <div class="acoes">
+
+                <button
+                    class="btn btn-green"
+                    onclick="exportarCSV('${dia.id}')"
+                >
+                    📊 PLANILHA
+                </button>
+
+                <button
+                    class="btn btn-danger"
+                    onclick="limparTMI('${dia.id}')"
+                >
+                    🗑️ LIMPAR
+                </button>
+
+            </div>
+
+        </section>
+    `;
+
+    document.getElementById(
+        "app"
+    ).innerHTML = html;
+
+    configurarEnter();
+}
+
+
+/* =========================
+   TABELA
+========================= */
+
+function gerarTabela(dia) {
+
+    if (!dia.registros.length) {
+
+        return `
+
+            <div class="vazio">
+                Nenhum TMI registrado ainda.
+            </div>
+
+        `;
+    }
+
+    let html = `
+
+        <div class="tabela-header">
+
+            <span>#</span>
+            <span>BOBINA</span>
+            <span>FXF</span>
+            <span>VXV</span>
+            <span>ESTÁTICO COF</span>
+            <span>AVERAGE COF</span>
+            <span></span>
+
+        </div>
+    `;
+
+    dia.registros.forEach(
+        (r,index) => {
+
+            html += `
+
+                <div class="linha">
+
+                    <span class="numero">
+                        ${index + 1}
+                    </span>
+
+                    <span class="valor">
+                        ${escapar(r.bobina || "-")}
+                    </span>
+
+                    <span>
+                        ${r.fxf || "-"}
+                    </span>
+
+                    <span>
+                        ${r.vxv || "-"}
+                    </span>
+
+                    <span>
+                        ${r.estatico || "-"}
+                    </span>
+
+                    <span>
+                        ${r.average || "-"}
+                    </span>
+
+                    <button
+                        class="excluir"
+                        onclick="excluirTMI(${r.id})"
+                    >
+                        ×
+                    </button>
+
+                </div>
+            `;
+        }
+    );
+
+    return html;
+}
+
+
+/* =========================
+   ADICIONAR
+========================= */
+
+function adicionarTMI() {
+
+    const dia =
+        dias.find(
+            d => d.id === diaAtualId
+        );
+
+    if (!dia) return;
+
+    const bobina =
+        document.getElementById(
+            "bobina"
+        ).value.trim();
+
+    const fxf =
+        document.getElementById(
+            "fxf"
+        ).value.trim();
+
+    const vxv =
+        document.getElementById(
+            "vxv"
+        ).value.trim();
+
+    const estatico =
+        document.getElementById(
+            "estatico"
+        ).value.trim();
+
+    const average =
+        document.getElementById(
+            "average"
+        ).value.trim();
+
+    if (!bobina) {
+
+        alert(
+            "Digite a bobina."
+        );
+
+        document
+            .getElementById("bobina")
+            .focus();
+
+        return;
+    }
+
+    if (!fxf && !vxv) {
+
+        alert(
+            "Digite FXF ou VXV."
+        );
+
+        return;
+    }
+
+    if (!estatico && !average) {
+
+        alert(
+            "Digite Estático COF ou Average COF."
+        );
+
+        return;
+    }
+
+    dia.registros.push({
+
+        id: Date.now(),
+
+        bobina,
+
+        fxf,
+
+        vxv,
+
+        estatico,
+
+        average
+
+    });
+
+    salvarDados();
+
+    abrirDia(dia.id);
+}
+
+
+/* =========================
+   ENTER
+========================= */
+
+function configurarEnter() {
+
+    const bobina =
+        document.getElementById("bobina");
+
+    const fxf =
+        document.getElementById("fxf");
+
+    const vxv =
+        document.getElementById("vxv");
+
+    const estatico =
+        document.getElementById("estatico");
+
+    const average =
+        document.getElementById("average");
+
+    bobina.onkeydown = function(e) {
+
+        if (e.key === "Enter") {
+
+            fxf.focus();
+
+        }
+    };
+
+    fxf.onkeydown = function(e) {
+
+        if (e.key === "Enter") {
+
+            vxv.focus();
+
+        }
+    };
+
+    vxv.onkeydown = function(e) {
+
+        if (e.key === "Enter") {
+
+            estatico.focus();
+
+        }
+    };
+
+    estatico.onkeydown = function(e) {
+
+        if (e.key === "Enter") {
+
+            average.focus();
+
+        }
+    };
+
+    average.onkeydown = function(e) {
+
+        if (e.key === "Enter") {
+
+            adicionarTMI();
+
+        }
+    };
+}
+
+
+/* =========================
+   EXCLUIR TMI
+========================= */
+
+function excluirTMI(id) {
+
+    const dia =
+        dias.find(
+            d => d.id === diaAtualId
+        );
+
+    if (!dia) return;
+
+    if (
+        !confirm(
+            "Excluir este TMI?"
+        )
+    ) return;
+
+    dia.registros =
+        dia.registros.filter(
+            r => r.id !== id
+        );
+
+    salvarDados();
+
+    abrirDia(dia.id);
+}
+
+
+/* =========================
+   LIMPAR
+========================= */
+
+function limparTMI(id) {
+
+    const dia =
+        dias.find(
+            d => d.id === id
+        );
+
+    if (!dia) return;
+
+    if (
+        !confirm(
+            "Apagar todos os TMI deste dia?"
+        )
+    ) return;
+
+    dia.registros = [];
+
+    salvarDados();
+
+    abrirDia(dia.id);
+}
+
+
+/* =========================
+   EXCLUIR DIA
+========================= */
+
+function excluirDia(id) {
+
+    if (
+        !confirm(
+            "Excluir este dia inteiro?"
+        )
+    ) return;
+
+    dias =
+        dias.filter(
+            d => d.id !== id
+        );
+
+    salvarDados();
+
+    telaInicial();
+}
+
+
+/* =========================
+   PLANILHA
+========================= */
+
+function exportarCSV(id) {
+
+    const dia =
+        dias.find(
+            d => d.id === id
+        );
+
+    if (
+        !dia ||
+        !dia.registros.length
+    ) {
+
+        alert(
+            "Não há TMI para exportar."
+        );
+
+        return;
+    }
+
+    let csv =
+        "BOBINA;FXF;VXV;ESTATICO COF;AVERAGE COF\n";
+
+    dia.registros.forEach(r => {
+
+        csv +=
+            `"${r.bobina || ""}";` +
+            `"${r.fxf || ""}";` +
+            `"${r.vxv || ""}";` +
+            `"${r.estatico || ""}";` +
+            `"${r.average || ""}"\n`;
+
+    });
+
+    const blob =
+        new Blob(
+            [
+                "\ufeff" + csv
+            ],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const link =
+        document.createElement("a");
+
+    link.href = url;
+
+    link.download =
+        `TMI_${dia.data}.csv`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    URL.revokeObjectURL(url);
+}
+
+
+/* =========================
+   ESCAPAR TEXTO
+========================= */
+
+function escapar(texto) {
+
+    return String(texto)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+
+/* =========================
+   INICIAR
+========================= */
+
+telaInicial();
+
+</script>
+
+</body>
+</html>
+```

@@ -1,0 +1,126 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Controle COF</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #eef1f5;
+            color: #1f2937;
+        }
+
+        main {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        header {
+            background: #111827;
+            color: white;
+            padding: 18px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .subtitulo {
+            color: #6b7280;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .opcao {
+            background: white;
+            border-radius: 18px;
+            padding: 22px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,.08);
+            cursor: pointer;
+            border: 1px solid #e5e7eb;
+        }
+
+        .opcao:active {
+            transform: scale(.98);
+        }
+
+        .icone {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .titulo {
+            font-size: 21px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .descricao {
+            color: #6b7280;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">📋 Controle COF</div>
+</header>
+
+<main>
+
+    <div class="subtitulo">
+        Escolha o tipo de análise
+    </div>
+
+    <div
+        class="opcao"
+        onclick="location.href='normal.html'"
+    >
+        <div class="icone">📋</div>
+
+        <div class="titulo">
+            COF NORMAL
+        </div>
+
+        <div class="descricao">
+            Bobina, FXF e VXV
+        </div>
+    </div>
+
+    <div
+        class="opcao"
+        onclick="location.href='tmi.html'"
+    >
+        <div class="icone">📊</div>
+
+        <div class="titulo">
+            COF TMI
+        </div>
+
+        <div class="descricao">
+            Estático COF e Average COF
+        </div>
+    </div>
+
+</main>
+
+</body>
+</html>
+```
