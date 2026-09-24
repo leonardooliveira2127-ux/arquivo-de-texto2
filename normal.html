@@ -9,9 +9,15 @@
 <title>COF Normal</title>
 
 <style>
+
 * {
     box-sizing:border-box;
     -webkit-tap-highlight-color:transparent;
+}
+
+html,
+body {
+    touch-action:manipulation;
 }
 
 body {
@@ -21,8 +27,15 @@ body {
     color:#1f2937;
 }
 
-button,input {
+button,
+input {
     font:inherit;
+}
+
+button {
+    touch-action:manipulation;
+    -webkit-user-select:none;
+    user-select:none;
 }
 
 header {
@@ -60,6 +73,13 @@ main {
     padding:13px 15px;
     font-weight:bold;
     cursor:pointer;
+}
+
+.btn:disabled,
+.adicionar:disabled,
+.foto-btn:disabled {
+    opacity:.55;
+    pointer-events:none;
 }
 
 .btn-primary {
@@ -347,7 +367,24 @@ input:focus {
     font-weight:bold;
 }
 
+.mensagem {
+    position:fixed;
+    left:50%;
+    bottom:20px;
+    transform:translateX(-50%);
+    background:#111827;
+    color:white;
+    padding:11px 16px;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:bold;
+    z-index:9999;
+    display:none;
+    box-shadow:0 4px 15px rgba(0,0,0,.2);
+}
+
 @media(max-width:500px) {
+
     main {
         padding:10px;
     }
@@ -372,13 +409,16 @@ input:focus {
     .campo-mini input {
         font-size:14px;
     }
+
 }
+
 </style>
 </head>
 
 <body>
 
 <header>
+
 <div class="header">
 
     <div class="logo">
@@ -390,101 +430,291 @@ input:focus {
     </div>
 
 </div>
+
 </header>
 
 <main id="app"></main>
+
+<div id="mensagem" class="mensagem"></div>
 
 <input
     id="arquivoBackup"
     type="file"
     accept=".json,application/json"
     hidden
-    onchange="restaurarBackup(event)"
 >
 
 <script>
 
-let dias =
-    JSON.parse(
-        localStorage.getItem("cof_dias_normal")
-    ) || [];
+/* =====================================================
+   VARIÁVEIS
+===================================================== */
+
+let dias = [];
 
 let diaAtualId = null;
 
 let fotoTemporaria = "";
 
+let acaoEmAndamento = false;
 
-/* =========================
+
+/* =====================================================
+   CARREGAR DADOS
+===================================================== */
+
+function carregarDados() {
+
+    try {
+
+        const dados =
+            localStorage.getItem(
+                "cof_dias_normal"
+            );
+
+        if (!dados) {
+
+            dias = [];
+
+            return;
+        }
+
+        const convertido =
+            JSON.parse(dados);
+
+        dias =
+            Array.isArray(convertido)
+                ? convertido
+                : [];
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao carregar dados:",
+            erro
+        );
+
+        dias = [];
+
+    }
+
+}
+
+
+/* =====================================================
    SALVAR
-========================= */
+===================================================== */
 
 function salvarDados() {
 
-    localStorage.setItem(
-        "cof_dias_normal",
-        JSON.stringify(dias)
-    );
+    try {
+
+        localStorage.setItem(
+            "cof_dias_normal",
+            JSON.stringify(dias)
+        );
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao salvar:",
+            erro
+        );
+
+        mostrarMensagem(
+            "⚠️ Não foi possível salvar os dados."
+        );
+
+    }
 
 }
 
 
-/* =========================
+/* =====================================================
+   MENSAGEM
+===================================================== */
+
+let mensagemTimer = null;
+
+function mostrarMensagem(texto) {
+
+    const elemento =
+        document.getElementById(
+            "mensagem"
+        );
+
+    if (!elemento) return;
+
+    elemento.textContent =
+        texto;
+
+    elemento.style.display =
+        "block";
+
+    clearTimeout(
+        mensagemTimer
+    );
+
+    mensagemTimer =
+        setTimeout(() => {
+
+            elemento.style.display =
+                "none";
+
+        }, 1800);
+
+}
+
+
+/* =====================================================
+   BLOQUEIO DE DUPLO TOQUE
+===================================================== */
+
+function iniciarAcao() {
+
+    if (acaoEmAndamento) {
+
+        return false;
+
+    }
+
+    acaoEmAndamento = true;
+
+    return true;
+}
+
+
+function finalizarAcao() {
+
+    /*
+     * Pequeno atraso para impedir
+     * duplo toque no celular.
+     */
+
+    setTimeout(() => {
+
+        acaoEmAndamento = false;
+
+    }, 350);
+
+}
+
+
+/* =====================================================
    BACKUP
-========================= */
+===================================================== */
 
 function fazerBackup() {
 
-    if (dias.length === 0) {
-        alert("Não há dados para fazer backup.");
-        return;
+    if (!iniciarAcao()) return;
+
+    try {
+
+        if (dias.length === 0) {
+
+            alert(
+                "Não há dados para fazer backup."
+            );
+
+            return;
+
+        }
+
+        const backup = {
+
+            tipo:"COF_NORMAL",
+
+            versao:2,
+
+            dataBackup:
+                new Date().toISOString(),
+
+            dados:dias
+
+        };
+
+        const blob =
+            new Blob(
+                [
+                    JSON.stringify(
+                        backup,
+                        null,
+                        2
+                    )
+                ],
+                {
+                    type:
+                        "application/json;charset=utf-8"
+                }
+            );
+
+        const url =
+            URL.createObjectURL(blob);
+
+        const link =
+            document.createElement("a");
+
+        link.href =
+            url;
+
+        link.download =
+            `BACKUP_COF_NORMAL_${dataHoje()}.json`;
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        link.remove();
+
+        setTimeout(() => {
+
+            URL.revokeObjectURL(url);
+
+        }, 1000);
+
+        mostrarMensagem(
+            "✅ Backup realizado!"
+        );
+
+    } finally {
+
+        finalizarAcao();
+
     }
 
-    const backup = {
-        tipo: "COF_NORMAL",
-        versao: 1,
-        dataBackup: new Date().toISOString(),
-        dados: dias
-    };
-
-    const blob = new Blob(
-        [JSON.stringify(backup, null, 2)],
-        {
-            type:"application/json;charset=utf-8"
-        }
-    );
-
-    const url =
-        URL.createObjectURL(blob);
-
-    const link =
-        document.createElement("a");
-
-    link.href = url;
-
-    link.download =
-        `BACKUP_COF_NORMAL_${dataHoje()}.json`;
-
-    document.body.appendChild(link);
-
-    link.click();
-
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
-
-    alert("Backup do COF Normal realizado!");
 }
 
 
-/* =========================
-   RESTAURAR BACKUP
-========================= */
+/* =====================================================
+   RESTAURAR
+===================================================== */
 
 function selecionarBackup() {
 
-    document
-        .getElementById("arquivoBackup")
-        .click();
+    if (!iniciarAcao()) return;
+
+    const input =
+        document.getElementById(
+            "arquivoBackup"
+        );
+
+    input.value = "";
+
+    input.onchange =
+        restaurarBackup;
+
+    input.click();
+
+    /*
+     * Libera depois que o seletor
+     * de arquivo abrir.
+     */
+
+    setTimeout(() => {
+
+        acaoEmAndamento = false;
+
+    }, 1000);
 
 }
 
@@ -499,92 +729,115 @@ function restaurarBackup(event) {
     const leitor =
         new FileReader();
 
-    leitor.onload = function(e) {
+    leitor.onload =
+        function(e) {
 
-        try {
+            try {
 
-            const backup =
-                JSON.parse(e.target.result);
+                const backup =
+                    JSON.parse(
+                        e.target.result
+                    );
 
-            if (
-                !backup.dados ||
-                !Array.isArray(backup.dados)
-            ) {
+                if (
+                    !backup.dados ||
+                    !Array.isArray(
+                        backup.dados
+                    )
+                ) {
 
-                throw new Error(
-                    "Arquivo inválido"
+                    throw new Error(
+                        "Arquivo inválido"
+                    );
+
+                }
+
+                if (
+                    backup.tipo &&
+                    backup.tipo !==
+                        "COF_NORMAL"
+                ) {
+
+                    alert(
+                        "Esse backup não é do COF Normal."
+                    );
+
+                    return;
+
+                }
+
+                if (
+                    !confirm(
+                        "Restaurar este backup?\n\n" +
+                        "Os dados atuais serão substituídos."
+                    )
+                ) {
+
+                    return;
+
+                }
+
+                dias =
+                    backup.dados;
+
+                salvarDados();
+
+                diaAtualId =
+                    null;
+
+                telaInicial();
+
+                mostrarMensagem(
+                    "✅ Backup restaurado!"
                 );
 
-            }
+            } catch (erro) {
 
-            if (
-                backup.tipo &&
-                backup.tipo !== "COF_NORMAL"
-            ) {
+                console.error(
+                    erro
+                );
 
                 alert(
-                    "Esse backup não é do COF Normal."
+                    "Não foi possível restaurar o backup."
                 );
 
-                event.target.value = "";
-
-                return;
-            }
-
-            if (
-                !confirm(
-                    "Restaurar este backup?\n\nOs dados atuais do COF Normal serão substituídos."
-                )
-            ) {
+            } finally {
 
                 event.target.value = "";
 
-                return;
+                acaoEmAndamento =
+                    false;
 
             }
 
-            dias = backup.dados;
+        };
 
-            salvarDados();
-
-            event.target.value = "";
-
-            diaAtualId = null;
-
-            telaInicial();
-
-            alert(
-                "Backup restaurado com sucesso!"
-            );
-
-        } catch (erro) {
-
-            alert(
-                "Não foi possível restaurar o backup."
-            );
-
-            event.target.value = "";
-
-        }
-
-    };
-
-    leitor.readAsText(arquivo);
+    leitor.readAsText(
+        arquivo
+    );
 
 }
 
 
-/* =========================
+/* =====================================================
    DATA
-========================= */
+===================================================== */
 
 function dataHoje() {
 
-    const hoje = new Date();
+    const hoje =
+        new Date();
 
-    return hoje.getFullYear() + "-" +
-        String(hoje.getMonth()+1).padStart(2,"0") + "-" +
-        String(hoje.getDate()).padStart(2,"0");
+    return hoje.getFullYear() +
+        "-" +
+        String(
+            hoje.getMonth()+1
+        ).padStart(2,"0") +
+        "-" +
+        String(
+            hoje.getDate()
+        ).padStart(2,"0");
+
 }
 
 
@@ -592,24 +845,31 @@ function formatarData(data) {
 
     if (!data) return "";
 
-    const p = data.split("-");
+    const p =
+        data.split("-");
 
     return `${p[2]}/${p[1]}/${p[0]}`;
+
 }
 
 
-/* =========================
+/* =====================================================
    TELA INICIAL
-========================= */
+===================================================== */
 
 function telaInicial() {
 
-    diaAtualId = null;
+    diaAtualId =
+        null;
 
     document.getElementById(
         "contadorHeader"
     ).textContent =
-        `${dias.length} ${dias.length === 1 ? "dia" : "dias"}`;
+        `${dias.length} ${
+            dias.length === 1
+                ? "dia"
+                : "dias"
+        }`;
 
     let html = `
 
@@ -618,6 +878,7 @@ function telaInicial() {
             <h2>📅 Histórico</h2>
 
             <button
+                type="button"
                 class="btn btn-green"
                 onclick="fazerBackup()"
             >
@@ -629,6 +890,7 @@ function telaInicial() {
         <div class="backup-acoes">
 
             <button
+                type="button"
                 class="btn btn-secondary"
                 onclick="selecionarBackup()"
             >
@@ -636,6 +898,7 @@ function telaInicial() {
             </button>
 
             <button
+                type="button"
                 class="btn btn-secondary"
                 onclick="location.href='index.html'"
             >
@@ -665,6 +928,7 @@ function telaInicial() {
                 </p>
 
                 <button
+                    type="button"
                     class="btn btn-primary"
                     onclick="novoDia()"
                 >
@@ -680,66 +944,81 @@ function telaInicial() {
         const ordenados =
             [...dias].sort(
                 (a,b) =>
-                    b.data.localeCompare(a.data)
+                    b.data.localeCompare(
+                        a.data
+                    )
             );
 
-        ordenados.forEach(dia => {
+        ordenados.forEach(
+            dia => {
 
-            const total =
-                dia.registros.length;
+                const total =
+                    dia.registros
+                        ? dia.registros.length
+                        : 0;
 
-            const totalFXF =
-                dia.registros.reduce(
-                    (s,r) =>
-                        s + (Number(r.fxf)||0),
-                    0
-                );
+                const totalFXF =
+                    (dia.registros || [])
+                    .reduce(
+                        (s,r) =>
+                            s +
+                            (Number(r.fxf)||0),
+                        0
+                    );
 
-            const totalVXV =
-                dia.registros.reduce(
-                    (s,r) =>
-                        s + (Number(r.vxv)||0),
-                    0
-                );
+                const totalVXV =
+                    (dia.registros || [])
+                    .reduce(
+                        (s,r) =>
+                            s +
+                            (Number(r.vxv)||0),
+                        0
+                    );
 
-            html += `
+                html += `
 
-                <div
-                    class="dia-card"
-                    onclick="abrirDia('${dia.id}')"
-                >
+                    <div
+                        class="dia-card"
+                        onclick="abrirDia('${dia.id}')"
+                    >
 
-                    <div class="dia-topo">
+                        <div class="dia-topo">
 
-                        <div class="dia-data">
-                            📅 ${formatarData(dia.data)}
+                            <div class="dia-data">
+                                📅 ${formatarData(
+                                    dia.data
+                                )}
+                            </div>
+
+                            <div class="seta">
+                                ›
+                            </div>
+
                         </div>
 
-                        <div class="seta">
-                            ›
+                        <div class="dia-info">
+
+                            <span class="tag tag-blue">
+                                ${total} COF
+                            </span>
+
+                            <span class="tag tag-green">
+                                FXF: ${totalFXF}
+                            </span>
+
+                            <span class="tag tag-gray">
+                                VXV: ${totalVXV}
+                            </span>
+
                         </div>
 
                     </div>
 
-                    <div class="dia-info">
+                `;
 
-                        <span class="tag tag-blue">
-                            ${total} COF
-                        </span>
+            }
+        );
 
-                        <span class="tag tag-green">
-                            FXF: ${totalFXF}
-                        </span>
-
-                        <span class="tag tag-gray">
-                            VXV: ${totalVXV}
-                        </span>
-
-                    </div>
-
-                </div>
-            `;
-        });
     }
 
     html += `
@@ -749,6 +1028,7 @@ function telaInicial() {
         <div style="margin-top:12px;">
 
             <button
+                type="button"
                 class="btn btn-primary"
                 onclick="novoDia()"
             >
@@ -756,88 +1036,153 @@ function telaInicial() {
             </button>
 
         </div>
+
     `;
 
     document.getElementById(
         "app"
-    ).innerHTML = html;
+    ).innerHTML =
+        html;
+
 }
 
 
-/* =========================
+/* =====================================================
    NOVO DIA
-========================= */
+===================================================== */
 
 function novoDia() {
 
-    fotoTemporaria = "";
+    if (!iniciarAcao()) return;
 
-    document.getElementById(
-        "app"
-    ).innerHTML = `
+    try {
 
-        <button
-            class="btn btn-secondary voltar"
-            onclick="telaInicial()"
-        >
-            ← VOLTAR
-        </button>
+        fotoTemporaria = "";
 
-        <section class="card">
-
-            <h2>📅 Novo dia</h2>
-
-            <div class="campo">
-
-                <label>Data</label>
-
-                <input
-                    id="novaData"
-                    type="date"
-                    value="${dataHoje()}"
-                >
-
-            </div>
-
-            <div class="campo">
-
-                <label>
-                    Foto do produto
-                </label>
-
-                <input
-                    id="novaFoto"
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onchange="selecionarFoto(event)"
-                >
-
-                <button
-                    class="foto-btn"
-                    onclick="document.getElementById('novaFoto').click()"
-                >
-                    📷 Escolher foto
-                </button>
-
-                <img
-                    id="previewNovo"
-                    class="preview"
-                >
-
-            </div>
+        document.getElementById(
+            "app"
+        ).innerHTML = `
 
             <button
-                class="btn btn-primary"
-                onclick="criarDia()"
+                type="button"
+                class="btn btn-secondary voltar"
+                onclick="telaInicial()"
             >
-                CRIAR DIA
+                ← VOLTAR
             </button>
 
-        </section>
-    `;
+            <section class="card">
+
+                <h2>📅 Novo dia</h2>
+
+                <div class="campo">
+
+                    <label>
+                        Data
+                    </label>
+
+                    <input
+                        id="novaData"
+                        type="date"
+                        value="${dataHoje()}"
+                    >
+
+                </div>
+
+                <div class="campo">
+
+                    <label>
+                        Foto do produto
+                    </label>
+
+                    <input
+                        id="novaFoto"
+                        type="file"
+                        accept="image/*"
+                        hidden
+                    >
+
+                    <button
+                        type="button"
+                        class="foto-btn"
+                        id="btnFoto"
+                        onclick="abrirFoto()"
+                    >
+                        📷 Escolher foto
+                    </button>
+
+                    <img
+                        id="previewNovo"
+                        class="preview"
+                    >
+
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="btnCriarDia"
+                    onclick="criarDia()"
+                >
+                    CRIAR DIA
+                </button>
+
+            </section>
+
+        `;
+
+        const inputFoto =
+            document.getElementById(
+                "novaFoto"
+            );
+
+        inputFoto.addEventListener(
+            "change",
+            selecionarFoto
+        );
+
+    } finally {
+
+        finalizarAcao();
+
+    }
+
 }
 
+
+/* =====================================================
+   ABRIR FOTO
+===================================================== */
+
+function abrirFoto() {
+
+    if (acaoEmAndamento) {
+
+        /*
+         * Não bloqueia a abertura
+         * do seletor se já estiver
+         * na tela de novo dia.
+         */
+
+    }
+
+    const input =
+        document.getElementById(
+            "novaFoto"
+        );
+
+    if (input) {
+
+        input.click();
+
+    }
+
+}
+
+
+/* =====================================================
+   SELECIONAR FOTO
+===================================================== */
 
 function selecionarFoto(event) {
 
@@ -845,6 +1190,28 @@ function selecionarFoto(event) {
         event.target.files[0];
 
     if (!arquivo) return;
+
+    /*
+     * Impede arquivos gigantes
+     * de travarem o localStorage.
+     */
+
+    if (
+        arquivo.size >
+        5 * 1024 * 1024
+    ) {
+
+        alert(
+            "A foto é muito grande.\n\n" +
+            "Escolha uma foto de até 5 MB."
+        );
+
+        event.target.value =
+            "";
+
+        return;
+
+    }
 
     const leitor =
         new FileReader();
@@ -860,70 +1227,152 @@ function selecionarFoto(event) {
                     "previewNovo"
                 );
 
-            preview.src =
-                fotoTemporaria;
+            if (preview) {
 
-            preview.style.display =
-                "block";
+                preview.src =
+                    fotoTemporaria;
+
+                preview.style.display =
+                    "block";
+
+            }
+
+            mostrarMensagem(
+                "📷 Foto selecionada!"
+            );
+
         };
 
-    leitor.readAsDataURL(arquivo);
+    leitor.readAsDataURL(
+        arquivo
+    );
+
 }
 
 
-/* =========================
+/* =====================================================
    CRIAR DIA
-========================= */
+===================================================== */
 
 function criarDia() {
 
-    const data =
-        document.getElementById(
-            "novaData"
-        ).value;
+    if (!iniciarAcao()) return;
 
-    if (!data) {
-        alert("Escolha a data.");
-        return;
+    try {
+
+        const campo =
+            document.getElementById(
+                "novaData"
+            );
+
+        if (!campo) return;
+
+        const data =
+            campo.value;
+
+        if (!data) {
+
+            alert(
+                "Escolha a data."
+            );
+
+            return;
+
+        }
+
+        /*
+         * Proteção extra:
+         * não permite criar outro dia
+         * com o mesmo ID.
+         */
+
+        const id =
+            String(
+                Date.now()
+            );
+
+        const dia = {
+
+            id:id,
+
+            data:data,
+
+            foto:
+                fotoTemporaria || "",
+
+            registros:[]
+
+        };
+
+        dias.push(
+            dia
+        );
+
+        salvarDados();
+
+        /*
+         * Só abre depois de salvar.
+         */
+
+        diaAtualId =
+            id;
+
+        mostrarMensagem(
+            "✅ Dia criado!"
+        );
+
+        /*
+         * Pequeno atraso para
+         * o celular concluir o toque.
+         */
+
+        setTimeout(
+            () => abrirDia(id),
+            50
+        );
+
+    } finally {
+
+        /*
+         * Mantém bloqueado por
+         * tempo suficiente para
+         * impedir duplo toque.
+         */
+
+        setTimeout(
+            () => {
+                acaoEmAndamento =
+                    false;
+            },
+            500
+        );
+
     }
 
-    const dia = {
-
-        id: Date.now().toString(),
-
-        data: data,
-
-        foto: fotoTemporaria,
-
-        registros: []
-
-    };
-
-    dias.push(dia);
-
-    salvarDados();
-
-    abrirDia(dia.id);
 }
 
 
-/* =========================
+/* =====================================================
    ABRIR DIA
-========================= */
+===================================================== */
 
 function abrirDia(id) {
 
     const dia =
         dias.find(
-            d => d.id === id
+            d => String(d.id) === String(id)
         );
 
     if (!dia) {
+
         telaInicial();
+
         return;
+
     }
 
-    diaAtualId = id;
+    diaAtualId =
+        id;
 
     document.getElementById(
         "contadorHeader"
@@ -933,6 +1382,7 @@ function abrirDia(id) {
     let html = `
 
         <button
+            type="button"
             class="btn btn-secondary voltar"
             onclick="telaInicial()"
         >
@@ -944,10 +1394,13 @@ function abrirDia(id) {
             <div class="dia-header-top">
 
                 <h2>
-                    📅 ${formatarData(dia.data)}
+                    📅 ${formatarData(
+                        dia.data
+                    )}
                 </h2>
 
                 <button
+                    type="button"
                     class="btn btn-danger"
                     onclick="excluirDia('${dia.id}')"
                 >
@@ -955,16 +1408,20 @@ function abrirDia(id) {
                 </button>
 
             </div>
+
     `;
 
     if (dia.foto) {
 
         html += `
+
             <img
                 class="foto-dia"
                 src="${dia.foto}"
             >
+
         `;
+
     }
 
     html += `
@@ -973,13 +1430,17 @@ function abrirDia(id) {
 
         <section class="card">
 
-            <h2>➕ Adicionar COF</h2>
+            <h2>
+                ➕ Adicionar COF
+            </h2>
 
             <div class="inputs-grid">
 
                 <div class="campo-mini">
 
-                    <label>BOBINA</label>
+                    <label>
+                        BOBINA
+                    </label>
 
                     <input
                         id="bobina"
@@ -994,7 +1455,9 @@ function abrirDia(id) {
 
                 <div class="campo-mini">
 
-                    <label>FXF</label>
+                    <label>
+                        FXF
+                    </label>
 
                     <input
                         id="fxf"
@@ -1007,7 +1470,9 @@ function abrirDia(id) {
 
                 <div class="campo-mini">
 
-                    <label>VXV</label>
+                    <label>
+                        VXV
+                    </label>
 
                     <input
                         id="vxv"
@@ -1021,7 +1486,9 @@ function abrirDia(id) {
             </div>
 
             <button
+                type="button"
                 class="adicionar"
+                id="btnAdicionar"
                 onclick="adicionarCOF()"
             >
                 ＋ ADICIONAR
@@ -1031,22 +1498,32 @@ function abrirDia(id) {
 
         <section class="card">
 
-            <h2>📋 COF deste dia</h2>
+            <h2>
+                📋 COF deste dia
+            </h2>
 
             <div id="listaCOF">
+
     `;
 
-    if (dia.registros.length === 0) {
+    if (
+        !dia.registros ||
+        dia.registros.length === 0
+    ) {
 
         html += `
+
             <div class="vazio">
                 Nenhum COF registrado ainda.
             </div>
+
         `;
 
     } else {
 
-        html += gerarTabela(dia);
+        html +=
+            gerarTabela(dia);
+
     }
 
     html += `
@@ -1060,6 +1537,7 @@ function abrirDia(id) {
             <div class="acoes">
 
                 <button
+                    type="button"
                     class="btn btn-green"
                     onclick="exportarDiaCSV('${dia.id}')"
                 >
@@ -1067,6 +1545,7 @@ function abrirDia(id) {
                 </button>
 
                 <button
+                    type="button"
                     class="btn btn-danger"
                     onclick="limparCOF('${dia.id}')"
                 >
@@ -1076,11 +1555,15 @@ function abrirDia(id) {
             </div>
 
         </section>
+
     `;
 
     document.getElementById(
         "app"
-    ).innerHTML = html;
+    ).innerHTML =
+        html;
+
+    configurarEnter();
 
     const bobina =
         document.getElementById(
@@ -1089,16 +1572,19 @@ function abrirDia(id) {
 
     if (bobina) {
 
-        bobina.focus();
+        setTimeout(
+            () => bobina.focus(),
+            100
+        );
 
-        configurarEnter();
     }
+
 }
 
 
-/* =========================
+/* =====================================================
    TABELA
-========================= */
+===================================================== */
 
 function gerarTabela(dia) {
 
@@ -1107,12 +1593,17 @@ function gerarTabela(dia) {
         <div class="tabela-header">
 
             <span>#</span>
+
             <span>BOBINA</span>
+
             <span>FXF</span>
+
             <span>VXV</span>
+
             <span></span>
 
         </div>
+
     `;
 
     dia.registros.forEach(
@@ -1127,18 +1618,25 @@ function gerarTabela(dia) {
                     </span>
 
                     <span class="valor">
-                        ${escapar(r.bobina)}
+                        ${escapar(
+                            r.bobina
+                        )}
                     </span>
 
                     <span>
-                        ${r.fxf || "-"}
+                        ${
+                            r.fxf || "-"
+                        }
                     </span>
 
                     <span>
-                        ${r.vxv || "-"}
+                        ${
+                            r.vxv || "-"
+                        }
                     </span>
 
                     <button
+                        type="button"
                         class="excluir"
                         onclick="excluirCOF(${r.id})"
                     >
@@ -1146,282 +1644,541 @@ function gerarTabela(dia) {
                     </button>
 
                 </div>
+
             `;
+
         }
     );
 
     return html;
+
 }
 
 
-/* =========================
-   ADICIONAR
-========================= */
+/* =====================================================
+   ADICIONAR COF
+===================================================== */
 
 function adicionarCOF() {
 
-    const dia =
-        dias.find(
-            d => d.id === diaAtualId
+    if (!iniciarAcao()) return;
+
+    try {
+
+        const dia =
+            dias.find(
+                d =>
+                    String(d.id) ===
+                    String(diaAtualId)
+            );
+
+        if (!dia) return;
+
+        const bobinaElemento =
+            document.getElementById(
+                "bobina"
+            );
+
+        const fxfElemento =
+            document.getElementById(
+                "fxf"
+            );
+
+        const vxvElemento =
+            document.getElementById(
+                "vxv"
+            );
+
+        if (
+            !bobinaElemento ||
+            !fxfElemento ||
+            !vxvElemento
+        ) {
+
+            return;
+
+        }
+
+        const bobina =
+            bobinaElemento.value.trim();
+
+        const fxf =
+            fxfElemento.value.trim();
+
+        const vxv =
+            vxvElemento.value.trim();
+
+        if (!bobina) {
+
+            alert(
+                "Digite a bobina."
+            );
+
+            bobinaElemento.focus();
+
+            return;
+
+        }
+
+        if (
+            fxf === "" &&
+            vxv === ""
+        ) {
+
+            alert(
+                "Digite FXF ou VXV."
+            );
+
+            return;
+
+        }
+
+        /*
+         * Cria um ID realmente único.
+         */
+
+        const id =
+            String(
+                Date.now()
+            ) +
+            "_" +
+            Math.random()
+                .toString(36)
+                .substring(2,8);
+
+        dia.registros.push({
+
+            id:id,
+
+            bobina:bobina,
+
+            fxf:fxf,
+
+            vxv:vxv
+
+        });
+
+        salvarDados();
+
+        /*
+         * Limpa os campos antes
+         * de reconstruir a tela.
+         */
+
+        mostrarMensagem(
+            "✅ COF adicionado!"
         );
 
-    if (!dia) return;
-
-    const bobina =
-        document.getElementById(
-            "bobina"
-        ).value.trim();
-
-    const fxf =
-        document.getElementById(
-            "fxf"
-        ).value.trim();
-
-    const vxv =
-        document.getElementById(
-            "vxv"
-        ).value.trim();
-
-    if (!bobina) {
-
-        alert("Digite a bobina.");
-
-        document
-            .getElementById("bobina")
-            .focus();
-
-        return;
-    }
-
-    if (
-        fxf === "" &&
-        vxv === ""
-    ) {
-
-        alert(
-            "Digite FXF ou VXV."
+        abrirDia(
+            dia.id
         );
 
-        return;
+    } finally {
+
+        setTimeout(
+            () => {
+
+                acaoEmAndamento =
+                    false;
+
+            },
+            500
+        );
+
     }
 
-    dia.registros.push({
-
-        id: Date.now(),
-
-        bobina,
-
-        fxf,
-
-        vxv
-
-    });
-
-    salvarDados();
-
-    abrirDia(dia.id);
 }
 
 
-/* =========================
+/* =====================================================
    ENTER
-========================= */
+===================================================== */
 
 function configurarEnter() {
 
     const bobina =
-        document.getElementById("bobina");
+        document.getElementById(
+            "bobina"
+        );
 
     const fxf =
-        document.getElementById("fxf");
+        document.getElementById(
+            "fxf"
+        );
 
     const vxv =
-        document.getElementById("vxv");
+        document.getElementById(
+            "vxv"
+        );
 
-    bobina.addEventListener(
-        "keydown",
-        e => {
+    if (!bobina ||
+        !fxf ||
+        !vxv) {
 
-            if (e.key === "Enter") {
+        return;
+
+    }
+
+    /*
+     * Evita criar vários listeners
+     * se a tela for aberta novamente.
+     */
+
+    bobina.onkeydown =
+        function(e) {
+
+            if (
+                e.key === "Enter"
+            ) {
+
+                e.preventDefault();
+
                 fxf.focus();
+
             }
 
-        }
-    );
+        };
 
-    fxf.addEventListener(
-        "keydown",
-        e => {
+    fxf.onkeydown =
+        function(e) {
 
-            if (e.key === "Enter") {
+            if (
+                e.key === "Enter"
+            ) {
+
+                e.preventDefault();
+
                 vxv.focus();
+
             }
 
-        }
-    );
+        };
 
-    vxv.addEventListener(
-        "keydown",
-        e => {
+    vxv.onkeydown =
+        function(e) {
 
-            if (e.key === "Enter") {
+            if (
+                e.key === "Enter"
+            ) {
+
+                e.preventDefault();
+
                 adicionarCOF();
+
             }
 
-        }
-    );
+        };
+
 }
 
 
-/* =========================
-   EXCLUIR
-========================= */
+/* =====================================================
+   EXCLUIR COF
+===================================================== */
 
 function excluirCOF(id) {
 
-    const dia =
-        dias.find(
-            d => d.id === diaAtualId
+    if (!iniciarAcao()) return;
+
+    try {
+
+        const dia =
+            dias.find(
+                d =>
+                    String(d.id) ===
+                    String(diaAtualId)
+            );
+
+        if (!dia) return;
+
+        if (
+            !confirm(
+                "Excluir este COF?"
+            )
+        ) {
+
+            return;
+
+        }
+
+        dia.registros =
+            dia.registros.filter(
+                r =>
+                    String(r.id) !==
+                    String(id)
+            );
+
+        salvarDados();
+
+        abrirDia(
+            dia.id
         );
 
-    if (!dia) return;
+    } finally {
 
-    if (!confirm(
-        "Excluir este COF?"
-    )) return;
+        finalizarAcao();
 
-    dia.registros =
-        dia.registros.filter(
-            r => r.id !== id
-        );
+    }
 
-    salvarDados();
-
-    abrirDia(dia.id);
 }
 
+
+/* =====================================================
+   LIMPAR COF
+===================================================== */
 
 function limparCOF(id) {
 
-    const dia =
-        dias.find(
-            d => d.id === id
+    if (!iniciarAcao()) return;
+
+    try {
+
+        const dia =
+            dias.find(
+                d =>
+                    String(d.id) ===
+                    String(id)
+            );
+
+        if (!dia) return;
+
+        if (
+            !confirm(
+                "Apagar todos os COF deste dia?"
+            )
+        ) {
+
+            return;
+
+        }
+
+        dia.registros = [];
+
+        salvarDados();
+
+        abrirDia(
+            dia.id
         );
 
-    if (!dia) return;
+    } finally {
 
-    if (!confirm(
-        "Apagar todos os COF deste dia?"
-    )) return;
+        finalizarAcao();
 
-    dia.registros = [];
+    }
 
-    salvarDados();
-
-    abrirDia(dia.id);
 }
 
+
+/* =====================================================
+   EXCLUIR DIA
+===================================================== */
 
 function excluirDia(id) {
 
-    if (!confirm(
-        "Excluir este dia inteiro?"
-    )) return;
+    if (!iniciarAcao()) return;
 
-    dias =
-        dias.filter(
-            d => d.id !== id
+    try {
+
+        if (
+            !confirm(
+                "Excluir este dia inteiro?"
+            )
+        ) {
+
+            return;
+
+        }
+
+        dias =
+            dias.filter(
+                d =>
+                    String(d.id) !==
+                    String(id)
+            );
+
+        salvarDados();
+
+        telaInicial();
+
+        mostrarMensagem(
+            "🗑️ Dia excluído!"
         );
 
-    salvarDados();
+    } finally {
 
-    telaInicial();
+        finalizarAcao();
+
+    }
+
 }
 
 
-/* =========================
-   PLANILHA
-========================= */
+/* =====================================================
+   EXPORTAR CSV
+===================================================== */
 
 function exportarDiaCSV(id) {
 
-    const dia =
-        dias.find(
-            d => d.id === id
-        );
+    if (!iniciarAcao()) return;
 
-    if (
-        !dia ||
-        dia.registros.length === 0
-    ) {
+    try {
 
-        alert(
-            "Não há COF para exportar."
-        );
+        const dia =
+            dias.find(
+                d =>
+                    String(d.id) ===
+                    String(id)
+            );
 
-        return;
-    }
+        if (
+            !dia ||
+            !dia.registros ||
+            dia.registros.length === 0
+        ) {
 
-    let csv =
-        "BOBINA;FXF;VXV\n";
+            alert(
+                "Não há COF para exportar."
+            );
 
-    dia.registros.forEach(r => {
+            return;
 
-        csv +=
-            `"${r.bobina}";` +
-            `"${r.fxf}";` +
-            `"${r.vxv}"\n`;
+        }
 
-    });
+        let csv =
+            "BOBINA;FXF;VXV\n";
 
-    const blob =
-        new Blob(
-            ["\ufeff" + csv],
-            {
-                type:
-                    "text/csv;charset=utf-8;"
+        dia.registros.forEach(
+            r => {
+
+                csv +=
+                    `"${escaparCSV(
+                        r.bobina
+                    )}";` +
+                    `"${escaparCSV(
+                        r.fxf
+                    )}";` +
+                    `"${escaparCSV(
+                        r.vxv
+                    )}"\n`;
+
             }
         );
 
-    const url =
-        URL.createObjectURL(blob);
+        const blob =
+            new Blob(
+                [
+                    "\ufeff" +
+                    csv
+                ],
+                {
+                    type:
+                        "text/csv;charset=utf-8;"
+                }
+            );
 
-    const link =
-        document.createElement("a");
+        const url =
+            URL.createObjectURL(
+                blob
+            );
 
-    link.href = url;
+        const link =
+            document.createElement(
+                "a"
+            );
 
-    link.download =
-        `COF_${dia.data}.csv`;
+        link.href =
+            url;
 
-    document.body.appendChild(link);
+        link.download =
+            `COF_${dia.data}.csv`;
 
-    link.click();
+        document.body.appendChild(
+            link
+        );
 
-    document.body.removeChild(link);
+        link.click();
 
-    URL.revokeObjectURL(url);
+        link.remove();
+
+        setTimeout(
+            () => {
+
+                URL.revokeObjectURL(
+                    url
+                );
+
+            },
+            1000
+        );
+
+        mostrarMensagem(
+            "📊 Planilha gerada!"
+        );
+
+    } finally {
+
+        finalizarAcao();
+
+    }
+
 }
 
 
-/* =========================
+/* =====================================================
+   CSV
+===================================================== */
+
+function escaparCSV(valor) {
+
+    return String(
+        valor ?? ""
+    )
+    .replaceAll(
+        '"',
+        '""'
+    );
+
+}
+
+
+/* =====================================================
    SEGURANÇA
-========================= */
+===================================================== */
 
 function escapar(texto) {
 
-    return String(texto)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+    return String(
+        texto ?? ""
+    )
+    .replaceAll(
+        "&",
+        "&amp;"
+    )
+    .replaceAll(
+        "<",
+        "&lt;"
+    )
+    .replaceAll(
+        ">",
+        "&gt;"
+    )
+    .replaceAll(
+        '"',
+        "&quot;"
+    )
+    .replaceAll(
+        "'",
+        "&#039;"
+    );
+
 }
 
 
-/* =========================
+/* =====================================================
    INICIAR
-========================= */
+===================================================== */
+
+carregarDados();
 
 telaInicial();
 
