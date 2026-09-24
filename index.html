@@ -3,124 +3,368 @@
 <html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Controle COF</title>
+<title>Controle COF</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+<style>
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #eef1f5;
-            color: #1f2937;
-        }
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
-        main {
-            max-width: 500px;
-            margin: auto;
-            padding: 20px;
-        }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #eef1f5;
+    color: #1f2937;
+}
 
-        header {
-            background: #111827;
-            color: white;
-            padding: 18px;
-            text-align: center;
-        }
+main {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
 
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-        }
+.container {
+    width: 100%;
+    max-width: 600px;
+}
 
-        .subtitulo {
-            color: #6b7280;
-            text-align: center;
-            margin: 15px 0;
-        }
+.logo {
+    text-align: center;
+    margin-bottom: 25px;
+}
 
-        .opcao {
-            background: white;
-            border-radius: 18px;
-            padding: 22px;
-            margin-bottom: 15px;
-            box-shadow: 0 3px 10px rgba(0,0,0,.08);
-            cursor: pointer;
-            border: 1px solid #e5e7eb;
-        }
+.logo h1 {
+    margin: 0;
+    font-size: 32px;
+}
 
-        .opcao:active {
-            transform: scale(.98);
-        }
+.logo p {
+    margin-top: 8px;
+    color: #6b7280;
+}
 
-        .icone {
-            font-size: 40px;
-            margin-bottom: 10px;
-        }
+.opcoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
 
-        .titulo {
-            font-size: 21px;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
+.card {
+    background: white;
+    border-radius: 18px;
+    padding: 25px 18px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,.08);
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: .15s;
+}
 
-        .descricao {
-            color: #6b7280;
-            font-size: 14px;
-        }
-    </style>
+.card:active {
+    transform: scale(.97);
+}
+
+.card:hover {
+    border-color: #2563eb;
+}
+
+.icone {
+    font-size: 50px;
+    margin-bottom: 12px;
+}
+
+.card h2 {
+    margin: 0 0 8px;
+}
+
+.card p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.download-area {
+    margin-top: 18px;
+}
+
+.btn-download {
+    width: 100%;
+    height: 55px;
+    border: 0;
+    border-radius: 12px;
+    background: #111827;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-download:active {
+    transform: scale(.98);
+}
+
+.status {
+    text-align: center;
+    margin-top: 10px;
+    min-height: 20px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+@media (max-width: 500px) {
+
+    .opcoes {
+        grid-template-columns: 1fr;
+    }
+
+    .logo h1 {
+        font-size: 27px;
+    }
+
+}
+
+</style>
+
+<!-- Biblioteca para criar ZIP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
 </head>
 
 <body>
 
-<header>
-    <div class="logo">📋 Controle COF</div>
-</header>
-
 <main>
 
-    <div class="subtitulo">
-        Escolha o tipo de análise
-    </div>
+    <div class="container">
 
-    <div
-        class="opcao"
-        onclick="location.href='normal.html'"
-    >
-        <div class="icone">📋</div>
+        <div class="logo">
 
-        <div class="titulo">
-            COF NORMAL
+            <div style="font-size:55px;">
+                📊
+            </div>
+
+            <h1>
+                Controle COF
+            </h1>
+
+            <p>
+                Escolha o tipo de análise
+            </p>
+
         </div>
 
-        <div class="descricao">
-            Bobina, FXF e VXV
-        </div>
-    </div>
 
-    <div
-        class="opcao"
-        onclick="location.href='tmi.html'"
-    >
-        <div class="icone">📊</div>
+        <div class="opcoes">
 
-        <div class="titulo">
-            COF TMI
+            <!-- COF NORMAL -->
+
+            <div
+                class="card"
+                onclick="location.href='normal.html'"
+            >
+
+                <div class="icone">
+                    📋
+                </div>
+
+                <h2>
+                    COF NORMAL
+                </h2>
+
+                <p>
+                    Controle padrão de COF
+                </p>
+
+            </div>
+
+
+            <!-- COF TMI -->
+
+            <div
+                class="card"
+                onclick="location.href='tmi.html'"
+            >
+
+                <div class="icone">
+                    📊
+                </div>
+
+                <h2>
+                    COF TMI
+                </h2>
+
+                <p>
+                    Controle de análise TMI
+                </p>
+
+            </div>
+
         </div>
 
-        <div class="descricao">
-            Estático COF e Average COF
+
+        <!-- DOWNLOAD DO SISTEMA -->
+
+        <div class="download-area">
+
+            <button
+                class="btn-download"
+                onclick="baixarSistema()"
+            >
+                📦 BAIXAR SISTEMA
+            </button>
+
+            <div
+                id="status"
+                class="status"
+            ></div>
+
         </div>
+
     </div>
 
 </main>
 
+
+<script>
+
+async function baixarSistema() {
+
+    const status =
+        document.getElementById("status");
+
+    try {
+
+        status.textContent =
+            "⏳ Preparando o sistema...";
+
+
+        if (
+            typeof JSZip === "undefined"
+        ) {
+
+            throw new Error(
+                "Biblioteca ZIP não carregada."
+            );
+
+        }
+
+
+        const zip =
+            new JSZip();
+
+
+        /*
+         * Pega os três arquivos que estão
+         * na mesma pasta do index.html.
+         */
+
+        const arquivos = [
+            "index.html",
+            "normal.html",
+            "tmi.html"
+        ];
+
+
+        for (
+            const arquivo of arquivos
+        ) {
+
+            status.textContent =
+                `⏳ Adicionando ${arquivo}...`;
+
+
+            const resposta =
+                await fetch(arquivo);
+
+
+            if (!resposta.ok) {
+
+                throw new Error(
+                    `Não foi possível encontrar ${arquivo}`
+                );
+
+            }
+
+
+            const conteudo =
+                await resposta.text();
+
+
+            zip.file(
+                arquivo,
+                conteudo
+            );
+
+        }
+
+
+        status.textContent =
+            "📦 Criando arquivo ZIP...";
+
+
+        const blob =
+            await zip.generateAsync({
+
+                type: "blob",
+
+                compression: "DEFLATE",
+
+                compressionOptions: {
+                    level: 9
+                }
+
+            });
+
+
+        const url =
+            URL.createObjectURL(blob);
+
+
+        const link =
+            document.createElement("a");
+
+
+        link.href = url;
+
+        link.download =
+            "COF-SISTEMA.zip";
+
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        link.remove();
+
+
+        URL.revokeObjectURL(url);
+
+
+        status.textContent =
+            "✅ Sistema baixado!";
+
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        status.innerHTML =
+            "❌ Não foi possível criar o ZIP.<br>" +
+            "Abra o sistema por um servidor/local host para usar esta função.";
+
+    }
+
+}
+
+</script>
+
 </body>
+
 </html>
 ```
