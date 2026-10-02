@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Gramatura e Espessura</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f2f2f2;
+    color: #222;
+}
+
+.container {
+    width: min(1100px, 96%);
+    margin: 20px auto;
+}
+
+h1 {
+    text-align: center;
+    margin: 10px 0 20px;
+}
+
+.card,
+.historico {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.10);
+}
+
+.adicionar-card {
+    margin-bottom: 20px;
+}
+
+.campos {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    gap: 12px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #bbb;
+    border-radius: 9px;
+    font-size: 18px;
+}
+
+button {
+    border: 0;
+    border-radius: 9px;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 4px;
+}
+
+.btn-add-grande {
+    width: 100%;
+    margin: 14px 0 0;
+    padding: 16px;
+    background: #222;
+    color: white;
+    font-size: 18px;
+}
+
+.acoes {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.btn-backup {
+    background: #2563eb;
+    color: white;
+}
+
+.btn-restaurar {
+    background: #16a34a;
+    color: white;
+}
+
+.btn-planilha {
+    background: #7c3aed;
+    color: white;
+}
+
+.btn-download {
+    background: #0891b2;
+    color: white;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.tabela-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+}
+
+th,
+td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+th {
+    background: #eee;
+}
+
+.btn-editar {
+    background: #f59e0b;
+    color: white;
+}
+
+.btn-excluir {
+    background: #dc2626;
+    color: white;
+}
+
+.vazio {
+    text-align: center;
+    padding: 25px;
+    color: #777;
+}
+
+@media (max-width: 700px) {
+
+    .campos {
+        grid-template-columns: 1fr;
+    }
+
+    .acoes button {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>📏 Gramatura e Espessura</h1>
+
+
+    <!-- NOVO RESULTADO -->
+
+    <div class="card adicionar-card">
+
+        <h2>➕ NOVO RESULTADO</h2>
+
+        <div class="campos">
+
+            <div>
+
+                <label for="bobina">
+                    Nome / Nº da Bobina
+                </label>
+
+                <input
+                    id="bobina"
+                    type="text"
+                    placeholder="Ex.: A22"
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <div>
+
+                <label for="gramatura">
+                    Gramatura (g)
+                </label>
+
+                <input
+                    id="gramatura"
+                    type="text"
+                    inputmode="decimal"
+                    placeholder="Ex.: 120,5"
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <div>
+
+                <label for="espessura">
+                    Espessura (mm)
+                </label>
+
+                <input
+                    id="espessura"
+                    type="text"
+                    inputmode="decimal"
+                    placeholder="Ex.: 0,085"
+                    autocomplete="off"
+                >
+
+            </div>
+
+        </div>
+
+
+        <button
+            class="btn-add-grande"
+            onclick="adicionarRegistro()"
+        >
+            ➕ ADICIONAR
+        </button>
+
+    </div>
+
+
+
+    <!-- BOTÕES -->
+
+    <div class="acoes">
+
+        <button
+            class="btn-backup"
+            onclick="fazerBackup()"
+        >
+            💾 BACKUP
+        </button>
+
+
+        <button
+            class="btn-restaurar"
+            onclick="document.getElementById('arquivoBackup').click()"
+        >
+            ♻️ RESTAURAR BACKUP
+        </button>
+
+
+        <input
+            id="arquivoBackup"
+            type="file"
+            accept=".json,application/json"
+            onchange="restaurarBackup(event)"
+        >
+
+
+        <button
+            class="btn-planilha"
+            onclick="gerarPlanilha()"
+        >
+            📊 GERAR PLANILHA
+        </button>
+
+
+        <button
+            class="btn-download"
+            onclick="baixarCodigo()"
+        >
+            ⬇️ BAIXAR CÓDIGO
+        </button>
+
+    </div>
+
+
+
+    <!-- HISTÓRICO -->
+
+    <div class="historico">
+
+        <h2>📋 Histórico</h2>
+
+
+        <div class="tabela-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>#</th>
+
+                        <th>BOBINA</th>
+
+                        <th>GRAMATURA (g)</th>
+
+                        <th>ESPESSURA (mm)</th>
+
+                        <th>AÇÕES</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="lista"></tbody>
+
+            </table>
+
+        </div>
+
+
+        <div
+            id="mensagemVazia"
+            class="vazio"
+        >
+            Nenhum resultado registrado.
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+
+/* ================================
+   ARMAZENAMENTO
+================================ */
+
+const CHAVE = "gramatura_espessura_dados";
+
+let dados =
+    JSON.parse(localStorage.getItem(CHAVE)) || [];
+
+
+
+/* ================================
+   SALVAR
+================================ */
+
+function salvar() {
+
+    localStorage.setItem(
+        CHAVE,
+        JSON.stringify(dados)
+    );
+
+}
+
+
+
+/* ================================
+   MOSTRAR HISTÓRICO
+================================ */
+
+function mostrarDados() {
+
+    const lista =
+        document.getElementById("lista");
+
+    const vazio =
+        document.getElementById("mensagemVazia");
+
+
+    lista.innerHTML = "";
+
+
+    if (dados.length === 0) {
+
+        vazio.style.display = "block";
+
+        return;
+    }
+
+
+    vazio.style.display = "none";
+
+
+    dados.forEach((item, index) => {
+
+        const tr =
+            document.createElement("tr");
+
+
+        tr.innerHTML = `
+
+            <td>
+                ${index + 1}
+            </td>
+
+            <td>
+                ${escapeHtml(item.bobina || "—")}
+            </td>
+
+            <td>
+                ${escapeHtml(item.gramatura || "—")}
+            </td>
+
+            <td>
+                ${escapeHtml(item.espessura || "—")}
+            </td>
+
+            <td>
+
+                <button
+                    class="btn-editar"
+                    onclick="editar(${item.id})"
+                >
+                    ✏️ EDITAR
+                </button>
+
+
+                <button
+                    class="btn-excluir"
+                    onclick="excluir(${item.id})"
+                >
+                    🗑️ EXCLUIR
+                </button>
+
+            </td>
+
+        `;
+
+
+        lista.appendChild(tr);
+
+    });
+
+}
+
+
+
+/* ================================
+   ADICIONAR
+================================ */
+
+function adicionarRegistro() {
+
+    const bobina =
+        document
+        .getElementById("bobina")
+        .value
+        .trim();
+
+
+    const gramatura =
+        document
+        .getElementById("gramatura")
+        .value
+        .trim();
+
+
+    const espessura =
+        document
+        .getElementById("espessura")
+        .value
+        .trim();
+
+
+    if (!bobina) {
+
+        alert(
+            "Digite o nome ou número da bobina."
+        );
+
+        document
+        .getElementById("bobina")
+        .focus();
+
+        return;
+    }
+
+
+    if (!gramatura) {
+
+        alert(
+            "Digite a gramatura."
+        );
+
+        document
+        .getElementById("gramatura")
+        .focus();
+
+        return;
+    }
+
+
+    if (!espessura) {
+
+        alert(
+            "Digite a espessura."
+        );
+
+        document
+        .getElementById("espessura")
+        .focus();
+
+        return;
+    }
+
+
+    dados.push({
+
+        id: Date.now(),
+
+        bobina: bobina,
+
+        gramatura: gramatura,
+
+        espessura: espessura
+
+    });
+
+
+    salvar();
+
+    mostrarDados();
+
+
+    document
+    .getElementById("bobina")
+    .value = "";
+
+
+    document
+    .getElementById("gramatura")
+    .value = "";
+
+
+    document
+    .getElementById("espessura")
+    .value = "";
+
+
+    document
+    .getElementById("bobina")
+    .focus();
+
+}
+
+
+
+/* ================================
+   EDITAR
+================================ */
+
+function editar(id) {
+
+    const item =
+        dados.find(
+            x => x.id === id
+        );
+
+
+    if (!item) return;
+
+
+    const bobina =
+        prompt(
+            "Nome / Nº da Bobina:",
+            item.bobina || ""
+        );
+
+
+    if (bobina === null)
+        return;
+
+
+    const gramatura =
+        prompt(
+            "Gramatura (g):",
+            item.gramatura || ""
+        );
+
+
+    if (gramatura === null)
+        return;
+
+
+    const espessura =
+        prompt(
+            "Espessura (mm):",
+            item.espessura || ""
+        );
+
+
+    if (espessura === null)
+        return;
+
+
+    if (
+        !bobina.trim() ||
+        !gramatura.trim() ||
+        !espessura.trim()
+    ) {
+
+        alert(
+            "Preencha bobina, gramatura e espessura."
+        );
+
+        return;
+    }
+
+
+    item.bobina =
+        bobina.trim();
+
+
+    item.gramatura =
+        gramatura.trim();
+
+
+    item.espessura =
+        espessura.trim();
+
+
+    salvar();
+
+    mostrarDados();
+
+}
+
+
+
+/* ================================
+   EXCLUIR
+================================ */
+
+function excluir(id) {
+
+    const confirmar =
+        confirm(
+            "Tem certeza que deseja excluir este resultado?"
+        );
+
+
+    if (!confirmar)
+        return;
+
+
+    dados =
+        dados.filter(
+            x => x.id !== id
+        );
+
+
+    salvar();
+
+    mostrarDados();
+
+}
+
+
+
+/* ================================
+   BACKUP
+================================ */
+
+function fazerBackup() {
+
+    if (dados.length === 0) {
+
+        alert(
+            "Não há dados para fazer backup."
+        );
+
+        return;
+    }
+
+
+    const backup = {
+
+        sistema:
+            "Gramatura e Espessura",
+
+        versao: 1,
+
+        dataBackup:
+            new Date().toISOString(),
+
+        dados: dados
+
+    };
+
+
+    baixarArquivo(
+
+        JSON.stringify(
+            backup,
+            null,
+            2
+        ),
+
+        "backup-gramatura-espessura.json",
+
+        "application/json"
+
+    );
+
+}
+
+
+
+/* ================================
+   RESTAURAR BACKUP
+================================ */
+
+function restaurarBackup(event) {
+
+    const arquivo =
+        event.target.files[0];
+
+
+    if (!arquivo)
+        return;
+
+
+    const leitor =
+        new FileReader();
+
+
+    leitor.onload =
+    function(e) {
+
+        try {
+
+            const backup =
+                JSON.parse(
+                    e.target.result
+                );
+
+
+            const novosDados =
+                Array.isArray(backup)
+                ? backup
+                : backup.dados;
+
+
+            if (
+                !Array.isArray(
+                    novosDados
+                )
+            ) {
+
+                throw new Error();
+
+            }
+
+
+            const confirmar =
+                confirm(
+                    "Restaurar este backup vai substituir os dados atuais. Continuar?"
+                );
+
+
+            if (!confirmar) {
+
+                event.target.value = "";
+
+                return;
+            }
+
+
+            dados =
+                novosDados.map(
+                    item => ({
+
+                        id:
+                            item.id ||
+                            Date.now() +
+                            Math.random(),
+
+                        bobina:
+                            item.bobina || "",
+
+                        gramatura:
+                            item.gramatura || "",
+
+                        espessura:
+                            item.espessura || ""
+
+                    })
+                );
+
+
+            salvar();
+
+            mostrarDados();
+
+
+            alert(
+                "Backup restaurado com sucesso!"
+            );
+
+
+        }
+
+        catch (erro) {
+
+            alert(
+                "Não foi possível restaurar este backup."
+            );
+
+        }
+
+
+        event.target.value = "";
+
+    };
+
+
+    leitor.readAsText(
+        arquivo
+    );
+
+}
+
+
+
+/* ================================
+   PLANILHA
+================================ */
+
+function gerarPlanilha() {
+
+    if (dados.length === 0) {
+
+        alert(
+            "Não há dados para gerar a planilha."
+        );
+
+        return;
+    }
+
+
+    let csv =
+        "BOBINA;GRAMATURA (g);ESPESSURA (mm)\n";
+
+
+    dados.forEach(item => {
+
+        csv +=
+            `"${limparCSV(item.bobina)}";` +
+            `"${limparCSV(item.gramatura)}";` +
+            `"${limparCSV(item.espessura)}"\n`;
+
+    });
+
+
+    baixarArquivo(
+
+        "\ufeff" + csv,
+
+        "gramatura-espessura.csv",
+
+        "text/csv;charset=utf-8;"
+
+    );
+
+}
+
+
+
+/* ================================
+   BAIXAR O PRÓPRIO CÓDIGO
+================================ */
+
+function baixarCodigo() {
+
+    const conteudo =
+        "<!DOCTYPE html>\n" +
+        document.documentElement.outerHTML;
+
+
+    baixarArquivo(
+
+        conteudo,
+
+        "gramatura-espessura.html",
+
+        "text/html;charset=utf-8"
+
+    );
+
+}
+
+
+
+/* ================================
+   FUNÇÃO DE DOWNLOAD
+================================ */
+
+function baixarArquivo(
+    conteudo,
+    nome,
+    tipo
+) {
+
+    const blob =
+        new Blob(
+            [conteudo],
+            {
+                type: tipo
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href = url;
+
+    link.download = nome;
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    link.remove();
+
+
+    setTimeout(
+        () =>
+            URL.revokeObjectURL(
+                url
+            ),
+        1000
+    );
+
+}
+
+
+
+/* ================================
+   LIMPAR CSV
+================================ */
+
+function limparCSV(valor) {
+
+    return String(
+        valor || ""
+    )
+    .replace(
+        /"/g,
+        '""'
+    )
+    .replace(
+        /\r?\n/g,
+        " "
+    );
+
+}
+
+
+
+/* ================================
+   PROTEGER HTML
+================================ */
+
+function escapeHtml(valor) {
+
+    return String(valor)
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+
+/* ================================
+   ENTER = ADICIONAR
+================================ */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key !== "Enter"
+        )
+            return;
+
+
+        const ativo =
+            document.activeElement;
+
+
+        if (
+            ativo &&
+            [
+                "bobina",
+                "gramatura",
+                "espessura"
+            ].includes(
+                ativo.id
+            )
+        ) {
+
+            event.preventDefault();
+
+            adicionarRegistro();
+
+        }
+
+    }
+);
+
+
+
+/* ================================
+   INICIAR
+================================ */
+
+mostrarDados();
+
+</script>
+
+</body>
+</html>

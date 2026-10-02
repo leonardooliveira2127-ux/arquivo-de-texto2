@@ -22,7 +22,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
     font: inherit;
 }
 
@@ -183,8 +184,6 @@ button {
     font-size: 18px;
 }
 
-/* CAMPOS DO TMI */
-
 .campo {
     margin-bottom: 13px;
 }
@@ -196,7 +195,8 @@ label {
     margin-bottom: 6px;
 }
 
-input {
+input,
+select {
     width: 100%;
     height: 50px;
     border: 1px solid #d1d5db;
@@ -206,7 +206,8 @@ input {
     background: #fafafa;
 }
 
-input:focus {
+input:focus,
+select:focus {
     border-color: #2563eb;
     background: white;
 }
@@ -218,7 +219,31 @@ input:focus {
     margin-bottom: 13px;
 }
 
-/* FXF + VXV */
+/* FRENTE / VERSO */
+
+.lado-opcoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 13px;
+}
+
+.lado-btn {
+    height: 52px;
+    border: 2px solid #d1d5db;
+    border-radius: 10px;
+    background: #f9fafb;
+    font-weight: bold;
+    color: #4b5563;
+}
+
+.lado-btn.ativo {
+    border-color: #2563eb;
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+/* FXF / VXV */
 
 .dupla {
     display: grid;
@@ -227,17 +252,13 @@ input:focus {
     margin-bottom: 13px;
 }
 
-/* ESTÁTICO + AVERAGE */
+/* ESTÁTICO / AVERAGE */
 
 .dupla-cof {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     margin-bottom: 13px;
-}
-
-.campo-box {
-    min-width: 0;
 }
 
 .adicionar {
@@ -288,7 +309,7 @@ input:focus {
 }
 
 .tabela {
-    min-width: 700px;
+    min-width: 780px;
 }
 
 .tabela-header,
@@ -296,11 +317,12 @@ input:focus {
     display: grid;
     grid-template-columns:
         35px
-        1.4fr
+        1.3fr
         1fr
         1fr
-        1.3fr
-        1.3fr
+        1fr
+        1.2fr
+        1.2fr
         40px;
     gap: 6px;
     align-items: center;
@@ -345,8 +367,6 @@ input:focus {
     font-weight: bold;
 }
 
-/* MOBILE */
-
 @media (max-width: 500px) {
 
     main {
@@ -354,20 +374,13 @@ input:focus {
     }
 
     .dupla,
-    .dupla-cof {
+    .dupla-cof,
+    .lado-opcoes {
         gap: 8px;
     }
 
     .tabela {
-        min-width: 700px;
-    }
-
-    .titulo-area {
-        align-items: stretch;
-    }
-
-    .titulo-area .btn {
-        padding: 10px;
+        min-width: 780px;
     }
 }
 </style>
@@ -412,6 +425,7 @@ let dias =
     ) || [];
 
 let diaAtualId = null;
+let ladoSelecionado = "FRENTE";
 
 
 /* =========================
@@ -443,6 +457,7 @@ function dataHoje() {
         String(d.getDate()).padStart(2, "0");
 }
 
+
 function formatarData(data) {
 
     const p = data.split("-");
@@ -459,7 +474,9 @@ function fazerBackup() {
 
     if (!dias.length) {
 
-        alert("Não há dados para fazer backup.");
+        alert(
+            "Não há dados para fazer backup."
+        );
 
         return;
     }
@@ -468,27 +485,29 @@ function fazerBackup() {
 
         tipo: "COF_TMI",
 
-        versao: 2,
+        versao: 3,
 
         dataBackup:
             new Date().toISOString(),
 
         dados: dias
+
     };
 
-    const blob = new Blob(
-        [
-            JSON.stringify(
-                backup,
-                null,
-                2
-            )
-        ],
-        {
-            type:
-                "application/json;charset=utf-8"
-        }
-    );
+    const blob =
+        new Blob(
+            [
+                JSON.stringify(
+                    backup,
+                    null,
+                    2
+                )
+            ],
+            {
+                type:
+                    "application/json;charset=utf-8"
+            }
+        );
 
     const url =
         URL.createObjectURL(blob);
@@ -794,9 +813,10 @@ function criarDia() {
 
     const dia = {
 
-        id: Date.now().toString(),
+        id:
+            Date.now().toString(),
 
-        data: data,
+        data,
 
         registros: []
 
@@ -829,6 +849,8 @@ function abrirDia(id) {
     }
 
     diaAtualId = id;
+
+    ladoSelecionado = "FRENTE";
 
     document.getElementById(
         "contadorHeader"
@@ -885,6 +907,34 @@ function abrirDia(id) {
                     autocapitalize="characters"
                     placeholder="Digite a bobina"
                 >
+
+            </div>
+
+            <!-- FRENTE / VERSO -->
+
+            <label>
+                LADO
+            </label>
+
+            <div class="lado-opcoes">
+
+                <button
+                    type="button"
+                    id="btnFrente"
+                    class="lado-btn ativo"
+                    onclick="selecionarLado('FRENTE')"
+                >
+                    🔵 FRENTE
+                </button>
+
+                <button
+                    type="button"
+                    id="btnVerso"
+                    class="lado-btn"
+                    onclick="selecionarLado('VERSO')"
+                >
+                    🟠 VERSO
+                </button>
 
             </div>
 
@@ -1023,6 +1073,36 @@ function abrirDia(id) {
 
 
 /* =========================
+   FRENTE / VERSO
+========================= */
+
+function selecionarLado(lado) {
+
+    ladoSelecionado = lado;
+
+    const frente =
+        document.getElementById(
+            "btnFrente"
+        );
+
+    const verso =
+        document.getElementById(
+            "btnVerso"
+        );
+
+    frente.classList.toggle(
+        "ativo",
+        lado === "FRENTE"
+    );
+
+    verso.classList.toggle(
+        "ativo",
+        lado === "VERSO"
+    );
+}
+
+
+/* =========================
    TABELA
 ========================= */
 
@@ -1045,10 +1125,11 @@ function gerarTabela(dia) {
 
             <span>#</span>
             <span>BOBINA</span>
+            <span>LADO</span>
             <span>FXF</span>
             <span>VXV</span>
-            <span>ESTÁTICO COF</span>
-            <span>AVERAGE COF</span>
+            <span>ESTÁTICO</span>
+            <span>AVERAGE</span>
             <span></span>
 
         </div>
@@ -1067,6 +1148,10 @@ function gerarTabela(dia) {
 
                     <span class="valor">
                         ${escapar(r.bobina || "-")}
+                    </span>
+
+                    <span class="valor">
+                        ${r.lado || "FRENTE"}
                     </span>
 
                     <span>
@@ -1102,7 +1187,7 @@ function gerarTabela(dia) {
 
 
 /* =========================
-   ADICIONAR
+   ADICIONAR TMI
 ========================= */
 
 function adicionarTMI() {
@@ -1172,9 +1257,13 @@ function adicionarTMI() {
 
     dia.registros.push({
 
-        id: Date.now(),
+        id:
+            Date.now(),
 
         bobina,
+
+        lado:
+            ladoSelecionado,
 
         fxf,
 
@@ -1216,46 +1305,41 @@ function configurarEnter() {
     bobina.onkeydown = function(e) {
 
         if (e.key === "Enter") {
-
             fxf.focus();
-
         }
+
     };
 
     fxf.onkeydown = function(e) {
 
         if (e.key === "Enter") {
-
             vxv.focus();
-
         }
+
     };
 
     vxv.onkeydown = function(e) {
 
         if (e.key === "Enter") {
-
             estatico.focus();
-
         }
+
     };
 
     estatico.onkeydown = function(e) {
 
         if (e.key === "Enter") {
-
             average.focus();
-
         }
+
     };
 
     average.onkeydown = function(e) {
 
         if (e.key === "Enter") {
-
             adicionarTMI();
-
         }
+
     };
 }
 
@@ -1364,12 +1448,13 @@ function exportarCSV(id) {
     }
 
     let csv =
-        "BOBINA;FXF;VXV;ESTATICO COF;AVERAGE COF\n";
+        "BOBINA;LADO;FXF;VXV;ESTATICO COF;AVERAGE COF\n";
 
     dia.registros.forEach(r => {
 
         csv +=
             `"${r.bobina || ""}";` +
+            `"${r.lado || "FRENTE"}";` +
             `"${r.fxf || ""}";` +
             `"${r.vxv || ""}";` +
             `"${r.estatico || ""}";` +
