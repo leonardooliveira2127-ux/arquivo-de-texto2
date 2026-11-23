@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -27,25 +26,79 @@
         }
 
         header {
+            width: 100%;
             background: #111827;
             color: white;
-            padding: 16px;
-            position: sticky;
-            top: 0;
+            position: relative;
             z-index: 20;
         }
 
-        .header {
-            max-width: 700px;
-            margin: auto;
+        /* Banner substituível: proporção 1920 x 600 (3,2:1) */
+        .banner {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1920 / 600;
+            min-height: 110px;
+            max-height: 600px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1f2937, #374151);
+        }
+
+        .banner-imagem {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+        }
+
+        .banner-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            color: #d1d5db;
+            text-align: center;
+            font-size: clamp(12px, 2vw, 18px);
+            letter-spacing: .04em;
+            background: repeating-linear-gradient(
+                135deg,
+                rgba(255,255,255,.025) 0,
+                rgba(255,255,255,.025) 12px,
+                transparent 12px,
+                transparent 24px
+            );
+        }
+
+        .banner-conteudo {
+            position: absolute;
+            inset: auto 0 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
+            padding: 18px max(14px, calc((100% - 700px) / 2));
+            background: linear-gradient(transparent, rgba(0,0,0,.72));
         }
 
         .logo {
-            font-size: 22px;
+            font-size: clamp(17px, 2.2vw, 24px);
             font-weight: bold;
+            text-shadow: 0 2px 5px rgba(0,0,0,.65);
+        }
+
+        .contador {
+            flex-shrink: 0;
+            background: rgba(17, 24, 39, .82);
+            padding: 7px 11px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            backdrop-filter: blur(5px);
         }
 
         main {
@@ -309,7 +362,7 @@
         .tabela-header,
         .linha {
             display: grid;
-            grid-template-columns: 32px 1.5fr 1fr 1fr 35px;
+            grid-template-columns: 28px 1.5fr 1fr 1fr 35px 35px;
             gap: 5px;
             align-items: center;
         }
@@ -352,17 +405,20 @@
             font-weight: bold;
         }
 
+        .editar {
+            width: 32px;
+            height: 32px;
+            border: 0;
+            border-radius: 8px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-weight: bold;
+        }
+
         .acoes {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
-        }
-
-        .contador {
-            background: #374151;
-            padding: 6px 10px;
-            border-radius: 20px;
-            font-weight: bold;
         }
 
         /* =========================
@@ -370,6 +426,20 @@
         ========================= */
 
         @media (max-width: 500px) {
+
+            .banner {
+                min-height: 105px;
+            }
+
+            .banner-conteudo {
+                padding: 10px;
+                gap: 6px;
+            }
+
+            .contador {
+                padding: 5px 8px;
+                font-size: 12px;
+            }
 
             main {
                 padding: 10px;
@@ -393,11 +463,11 @@
             }
 
             .linha {
-                grid-template-columns: 28px 1.5fr 1fr 1fr 32px;
+                grid-template-columns: 25px 1.5fr 1fr 1fr 32px 32px;
             }
 
             .tabela-header {
-                grid-template-columns: 28px 1.5fr 1fr 1fr 32px;
+                grid-template-columns: 25px 1.5fr 1fr 1fr 32px 32px;
             }
 
             .linha,
@@ -411,16 +481,21 @@
 <body>
 
     <header>
-        <div class="header">
-
-            <div class="logo">
-                📋 Controle COF
+        <div class="banner">
+            <div id="bannerPlaceholder" class="banner-placeholder">
+                SUA IMAGEM AQUI · 1920 × 600 PX
             </div>
-
-            <div id="contadorHeader" class="contador">
-                0 dias
+            <img
+                class="banner-imagem"
+                src="img/Chevette.png"
+                alt="Banner do Controle COF"
+                onload="document.getElementById('bannerPlaceholder').style.display='none'"
+                onerror="this.style.display='none'"
+            >
+            <div class="banner-conteudo">
+                <div class="logo">📋 Controle COF</div>
+                <div id="contadorHeader" class="contador">0 dias</div>
             </div>
-
         </div>
     </header>
 
@@ -439,6 +514,7 @@
         let diaAtualId = null;
 
         let fotoTemporaria = "";
+        let editingCOFId = null;
 
 
         /* =====================================================
@@ -945,6 +1021,8 @@
 
         function abrirDia(id) {
 
+            editingCOFId = null;
+
             const dia =
                 dias.find(
                     d => d.id === id
@@ -1058,8 +1136,9 @@
 
                             <input
                                 id="fxf"
-                                type="number"
-                                inputmode="numeric"
+                                type="text"
+                                inputmode="decimal"
+                                autocomplete="off"
                                 placeholder="FXF"
                             >
 
@@ -1074,8 +1153,9 @@
 
                             <input
                                 id="vxv"
-                                type="number"
-                                inputmode="numeric"
+                                type="text"
+                                inputmode="decimal"
+                                autocomplete="off"
                                 placeholder="VXV"
                             >
 
@@ -1085,10 +1165,20 @@
 
 
                     <button
+                        id="btnSalvarCOF"
                         class="adicionar"
                         onclick="adicionarCOF()"
                     >
                         ＋ ADICIONAR
+                    </button>
+
+                    <button
+                        id="btnCancelarEdicao"
+                        class="btn btn-secondary"
+                        style="display:none;width:100%;margin-top:8px;"
+                        onclick="cancelarEdicaoCOF()"
+                    >
+                        CANCELAR EDIÇÃO
                     </button>
 
                 </section>
@@ -1197,6 +1287,7 @@
                     <span>VXV</span>
 
                     <span></span>
+                    <span></span>
 
                 </div>
 
@@ -1227,7 +1318,16 @@
                             </span>
 
                             <button
+                                class="editar"
+                                title="Editar COF"
+                                onclick="editarCOF(${r.id})"
+                            >
+                                ✎
+                            </button>
+
+                            <button
                                 class="excluir"
+                                title="Excluir COF"
                                 onclick="excluirCOF(${r.id})"
                             >
                                 ×
@@ -1253,89 +1353,88 @@
         function adicionarCOF() {
 
             const dia =
-                dias.find(
-                    d => d.id === diaAtualId
-                );
-
+                dias.find(d => d.id === diaAtualId);
 
             if (!dia) return;
 
-
             const bobina =
-                document.getElementById(
-                    "bobina"
-                ).value.trim();
-
+                document.getElementById("bobina").value.trim();
 
             const fxf =
-                document.getElementById(
-                    "fxf"
-                ).value.trim();
-
+                document.getElementById("fxf").value.trim();
 
             const vxv =
-                document.getElementById(
-                    "vxv"
-                ).value.trim();
-
+                document.getElementById("vxv").value.trim();
 
             if (!bobina) {
-
-                alert(
-                    "Digite a bobina."
-                );
-
-
-                document
-                    .getElementById(
-                        "bobina"
-                    )
-                    .focus();
-
-
+                alert("Digite a bobina.");
+                document.getElementById("bobina").focus();
                 return;
-
             }
 
-
-            if (
-                fxf === "" &&
-                vxv === ""
-            ) {
-
-                alert(
-                    "Digite FXF ou VXV."
-                );
-
+            if (fxf === "" && vxv === "") {
+                alert("Digite FXF ou VXV.");
                 return;
-
             }
 
+            if (editingCOFId !== null) {
+                const registro = dia.registros.find(r => r.id === editingCOFId);
 
-            dia.registros.push({
+                if (registro) {
+                    registro.bobina = bobina;
+                    registro.fxf = fxf;
+                    registro.vxv = vxv;
+                }
 
-                id:
-                    Date.now(),
-
-                bobina:
-                    bobina,
-
-                fxf:
-                    fxf,
-
-                vxv:
-                    vxv
-
-            });
-
+                editingCOFId = null;
+            } else {
+                dia.registros.push({
+                    id: Date.now(),
+                    bobina: bobina,
+                    fxf: fxf,
+                    vxv: vxv
+                });
+            }
 
             salvarDados();
+            abrirDia(dia.id);
+        }
 
 
-            abrirDia(
-                dia.id
-            );
+        function editarCOF(id) {
 
+            const dia = dias.find(d => d.id === diaAtualId);
+            if (!dia) return;
+
+            const registro = dia.registros.find(r => r.id === id);
+            if (!registro) return;
+
+            editingCOFId = id;
+
+            document.getElementById("bobina").value = registro.bobina ?? "";
+            document.getElementById("fxf").value = registro.fxf ?? "";
+            document.getElementById("vxv").value = registro.vxv ?? "";
+
+            document.getElementById("btnSalvarCOF").textContent = "💾 SALVAR ALTERAÇÕES";
+            document.getElementById("btnCancelarEdicao").style.display = "block";
+
+            document.getElementById("bobina").focus();
+            document.querySelector(".card h2").scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+
+
+        function cancelarEdicaoCOF() {
+
+            editingCOFId = null;
+
+            document.getElementById("bobina").value = "";
+            document.getElementById("fxf").value = "";
+            document.getElementById("vxv").value = "";
+
+            document.getElementById("btnSalvarCOF").textContent = "＋ ADICIONAR";
+            document.getElementById("btnCancelarEdicao").style.display = "none";
+
+            document.getElementById("bobina").focus();
         }
 
 
@@ -1666,4 +1765,3 @@
 </body>
 
 </html>
-```
